@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Análisis Climático - PCA por Décadas y Estaciones</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    max-width: 900px;
+    margin: 1rem auto;
+    padding: 0 1rem;
+    line-height: 1.6;
+    background-color: #fafafa;
+  }
+  h1, h2, h3 {
+    color: #2a6f97;
+  }
+  pre {
+    background: #272822;
+    color: #f8f8f2;
+    padding: 1rem;
+    border-radius: 6px;
+    overflow-x: auto;
+  }
+  code {
+    font-family: 'Courier New', Courier, monospace;
+  }
+  nav a {
+    color: #2a6f97;
+    text-decoration: none;
+    margin-right: 1rem;
+  }
+  nav a:hover {
+    text-decoration: underline;
+  }
+  .tooltip {
+    position: relative;
+    cursor: help;
+    border-bottom: 1px dotted #666;
+  }
+  .tooltip:hover::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    left: 0;
+    bottom: 100%;
+    background: #2a6f97;
+    color: #fff;
+    padding: 0.4rem 0.6rem;
+    border-radius: 5px;
+    white-space: nowrap;
+    font-size: 0.85rem;
+    transform: translateY(-6px);
+    z-index: 10;
+  }
+  img {
+    max-width: 100%;
+    height: auto;
+    margin: 0.7rem 0;
+    border-radius: 8px;
+    box-shadow: 0 0 6px rgba(0,0,0,0.1);
+  }
+  section {
+    margin-bottom: 3rem;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Análisis Climático: PCA por Décadas y Estaciones</h1>
+  <p>Este proyecto analiza datos de temperatura espacial y temporal usando <span class="tooltip" data-tooltip="Análisis estadístico que reduce la dimensionalidad transformando variables correlacionadas en nuevas variables independientes.">PCA (Análisis de Componentes Principales)</span> para tres décadas clave y cuatro estaciones climáticas.</p>
+</header>
+
+<nav>
+  <a href="#preparacion">Preparación de Datos</a>
+  <a href="#analisis">Análisis por Estación y Década</a>
+  <a href="#resultados">Resultados y Gráficos</a>
+  <a href="#interpretacion">Interpretación</a>
+  <a href="#glosario">Glosario</a>
+</nav>
+
+<section id="preparacion">
+  <h2>1. Preparación de Datos</h2>
+  <p>Se carga el archivo NetCDF y se extraen las variables principales para el análisis.</p>
+  <pre><code># Establecer directorio de trabajo y abrir archivo NetCDF
+setwd("C:/Mi_proyecto/climate-analist/Data")
+nc <- nc_open("Land_and_Ocean_Alternate_EqualArea.nc")
+
+# Extraer variables
+lon <- ncvar_get(nc, "longitude")
+lat <- ncvar_get(nc, "latitude")
+tiempo <- ncvar_get(nc, "time")
+tem <- ncvar_get(nc, "temperature")
+climatology <- ncvar_get(nc, "climatology")
+
+nc_close(nc)</code></pre>
+</section>
+
+<section id="analisis">
+  <h2>2. Análisis por Estación y Década</h2>
+  <p>Para cada estación (Invierno, Primavera, Verano, Otoño) y década (1850s, 1930s, 2010s) se realiza el filtrado y análisis PCA.</p>
+
+  <h3>2.1 Definición de estaciones y décadas</h3>
+  <pre><code>meses_estaciones <- list(
+  invierno = c(12, 1, 2),
+  primavera = c(3, 4, 5),
+  verano    = c(6, 7, 8),
+  otono     = c(9, 10, 11)
+)
+
+decadas <- list(
+  "1850s" = 1850:1859,
+  "1930s" = 1930:1939,
+  "2010s" = 2010:2019
+)</code></pre>
+
+  <h3>2.2 Función para obtener índices de tiempo para estación y década</h3>
+  <pre><code>get_indices_estacion_decada <- function(meses_est, anos_decada, tiempo) {
+  years <- floor(tiempo)
+  months <- round((tiempo - years) * 12) + 1
+
+  indices <- c()
+  for (ano in anos_decada) {
+    for (mes in meses_est) {
+      # Ajuste para invierno que cruza años
+      if (mes == 12) {
+        indices <- c(indices, which(years == (ano - 1) & months == 12))
+      } else {
+        indices <- c(indices, which(years == ano & months == mes))
+      }
+    }
+  }
+  sort(unique(indices))
+}</code></pre>
+
+  <h3>2.3 Ejemplo: Extraer datos para invierno en 1850s y hacer PCA</h3>
+  <pre><code>indices_1850s_inv <- get_indices_estacion_decada(meses_estaciones$invierno, decadas$`1850s`, tiempo)
+tem_1850s_inv <- tem[,,indices_1850s_inv]  # dims: lon x lat x tiempo
+
+# Reorganizar para PCA (pixeles en filas, tiempo en columnas)
+dim_espacio <- dim(tem_1850s_inv)[1] * dim(tem_1850s_inv)[2]
+temp_matrix <- matrix(NA, nrow = dim_espacio, ncol = length(indices_1850s_inv))
+
+for (i in seq_along(indices_1850s_inv)) {
+  temp_slice <- tem_1850s_inv[,,i]
+  temp_matrix[, i] <- as.vector(temp_slice)
+}
+
+# Eliminar filas con NA en todas las columnas
+temp_matrix_clean <- temp_matrix[rowSums(is.na(temp_matrix)) < ncol(temp_matrix), ]
+
+# PCA
+pca_1850s_inv <- prcomp(temp_matrix_clean, scale. = TRUE)</code></pre>
+
+</section>
+
+<section id="resultados">
+  <h2>3. Resultados y Gráficos</h2>
+  <p>A continuación algunos gráficos generados para cada estación y década.</p>
+
+  <h3>3.1 Década 1850s - Invierno</h3>
+  <p><strong>Scree Plot:</strong></p>
+  <img src="Results/1850s/invierno/ScreePlot_invierno_1850s.png" alt="Scree Plot Invierno 1850s" />
+
+  <p><strong>PCA Plot:</strong></p>
+  <img src="Results/1850s/invierno/PCAplot_invierno_1850s.png" alt="PCA Plot Invierno 1850s" />
+
+  <p><strong>Heatmap:</strong></p>
+  <img src="Results/1850s/invierno/Heatmap_invierno_1850s.png" alt="Heatmap Invierno 1850s" />
+
+  <!-- Repite la estructura para otras estaciones y décadas según necesites -->
+</section>
+
+<section id="interpretacion">
+  <h2>4. Interpretación de Resultados</h2>
+  <p>Los gráficos permiten:</p>
+  <ul>
+    <li><span class="tooltip" data-tooltip="Muestra la cantidad de varianza explicada por cada componente principal.">Scree Plot</span>: evaluar la cantidad de componentes a retener.</li>
+    <li><span class="tooltip" data-tooltip="Visualiza la distribución de los pixeles en los dos primeros componentes principales.">PCA Plot</span>: observar agrupamientos espaciales.</li>
+    <li><span class="tooltip" data-tooltip="Mapa de calor que muestra cómo varía la temperatura por pixel a lo largo del tiempo.">Heatmap</span>: analizar tendencias temporales.</li>
+  </ul>
+</section>
+
+<section id="glosario">
+  <h2>5. Glosario de términos</h2>
+  <dl>
+    <dt><abbr title="Análisis estadístico para reducción dimensional que transforma variables correlacionadas en nuevas variables independientes.">PCA</abbr></dt>
+    <dd>Análisis de Componentes Principales</dd>
+
+    <dt><abbr title="Formato de archivo multidimensional para almacenar datos científicos, especialmente climatológicos.">NetCDF</abbr></dt>
+    <dd>Network Common Data Form</dd>
+
+    <dt
+
