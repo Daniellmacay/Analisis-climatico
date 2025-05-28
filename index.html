@@ -113,7 +113,7 @@ decadas <- list(
   "1850s" = 1850:1859,
   "1930s" = 1930:1939,
   "2010s" = 2010:2019
-)</code></pre>
+) #Añade las decadas necesarias</code></pre>
 
   <h3>2.2 Función para obtener índices de tiempo para estación y década</h3>
   <pre><code>get_indices_estacion_decada <- function(meses_est, anos_decada, tiempo) {
@@ -134,7 +134,7 @@ decadas <- list(
   sort(unique(indices))
 }</code></pre>
 
-  <h3>2.3 Ejemplo: Extraer datos para invierno en 1850s y hacer PCA</h3>
+  <h3>2.3 Extraer datos para invierno en 1850s y hacer PCA</h3>
   <pre><code>indices_1850s_inv <- get_indices_estacion_decada(meses_estaciones$invierno, decadas$`1850s`, tiempo)
 tem_1850s_inv <- tem[,,indices_1850s_inv]  # dims: lon x lat x tiempo
 
@@ -151,7 +151,7 @@ for (i in seq_along(indices_1850s_inv)) {
 temp_matrix_clean <- temp_matrix[rowSums(is.na(temp_matrix)) < ncol(temp_matrix), ]
 
 # PCA
-pca_1850s_inv <- prcomp(temp_matrix_clean, scale. = TRUE)</code></pre>
+pca_1850s_inv <- prcomp(temp_matrix_clean, scale. = TRUE) #Modifica las decadas y estacion segun sea necesario</code></pre>
 
 </section>
 
@@ -169,7 +169,57 @@ pca_1850s_inv <- prcomp(temp_matrix_clean, scale. = TRUE)</code></pre>
   <p><strong>Heatmap:</strong></p>
   <img src="Results/1850s/invierno/Heatmap_invierno_1850s.png" alt="Heatmap Invierno 1850s" />
 
-  <!-- Repite la estructura para otras estaciones y décadas según necesites -->
+    <h4>Primavera</h4>
+  <img src="Results/1850s/primavera/ScreePlot_primavera_1850s.png" alt="Scree Plot Primavera 1850s" />
+  <img src="Results/1850s/primavera/PCAplot_primavera_1850s.png" alt="PCA Plot Primavera 1850s" />
+  <img src="Results/1850s/primavera/Heatmap_primavera_1850s.png" alt="Heatmap Primavera 1850s" />
+  <h4>Verano</h4>
+  <img src="Results/1850s/verano/ScreePlot_verano_1850s.png" alt="Scree Plot Verano 1850s" />
+  <img src="Results/1850s/verano/PCAplot_verano_1850s.png" alt="PCA Plot Verano 1850s" />
+  <img src="Results/1850s/verano/Heatmap_verano_1850s.png" alt="Heatmap Verano 1850s" />
+  <h4>Otoño</h4>
+  <img src="Results/1850s/otono/ScreePlot_otono_1850s.png" alt="Scree Plot Otoño 1850s" />
+  <img src="Results/1850s/otono/PCAplot_otono_1850s.png" alt="PCA Plot Otoño 1850s" />
+  <img src="Results/1850s/otono/Heatmap_otono_1850s.png" alt="Heatmap Otoño 1850s" />
+
+  <!-- 1930s -->
+  <h3>Década 1930s</h3>
+  <h4>Invierno</h4>
+  <img src="Results/1930s/invierno/ScreePlot_invierno_1930s.png" alt="Scree Plot Invierno 1930s" />
+  <img src="Results/1930s/invierno/PCAplot_invierno_1930s.png" alt="PCA Plot Invierno 1930s" />
+  <img src="Results/1930s/invierno/Heatmap_invierno_1930s.png" alt="Heatmap Invierno 1930s" />
+  <h4>Primavera</h4>
+  <img src="Results/1930s/primavera/ScreePlot_primavera_1930s.png" alt="Scree Plot Primavera 1930s" />
+  <img src="Results/1930s/primavera/PCAplot_primavera_1930s.png" alt="PCA Plot Primavera 1930s" />
+  <img src="Results/1930s/primavera/Heatmap_primavera_1930s.png" alt="Heatmap Primavera 1930s" />
+  <h4>Verano</h4>
+  <img src="Results/1930s/verano/ScreePlot_verano_1930s.png" alt="Scree Plot Verano 1930s" />
+  <img src="Results/1930s/verano/PCAplot_verano_1930s.png" alt="PCA Plot Verano 1930s" />
+  <img src="Results/1930s/verano/Heatmap_verano_1930s.png" alt="Heatmap Verano 1930s" />
+  <h4>Otoño</h4>
+  <img src="Results/1930s/otono/ScreePlot_otono_1930s.png" alt="Scree Plot Otoño 1930s" />
+  <img src="Results/1930s/otono/PCAplot_otono_1930s.png" alt="PCA Plot Otoño 1930s" />
+  <img src="Results/1930s/otono/Heatmap_otono_1930s.png" alt="Heatmap Otoño 1930s" />
+
+  <!-- 2010s -->
+  <h3>Década 2010s</h3>
+  <h4>Invierno</h4>
+  <img src="Results/2010s/invierno/ScreePlot_invierno_2010s.png" alt="Scree Plot Invierno 2010s" />
+  <img src="Results/2010s/invierno/PCAplot_invierno_2010s.png" alt="PCA Plot Invierno 2010s" />
+  <img src="Results/2010s/invierno/Heatmap_invierno_2010s.png" alt="Heatmap Invierno 2010s" />
+  <h4>Primavera</h4>
+  <img src="Results/2010s/primavera/ScreePlot_primavera_2010s.png" alt="Scree Plot Primavera 2010s" />
+  <img src="Results/2010s/primavera/PCAplot_primavera_2010s.png" alt="PCA Plot Primavera 2010s" />
+  <img src="Results/2010s/primavera/Heatmap_primavera_2010s.png" alt="Heatmap Primavera 2010s" />
+  <h4>Verano</h4>
+  <img src="Results/2010s/verano/ScreePlot_verano_2010s.png" alt="Scree Plot Verano 2010s" />
+  <img src="Results/2010s/verano/PCAplot_verano_2010s.png" alt="PCA Plot Verano 2010s" />
+  <img src="Results/2010s/verano/Heatmap_verano_2010s.png" alt="Heatmap Verano 2010s" />
+  <h4>Otoño</h4>
+  <img src="Results/2010s/otono/ScreePlot_otono_2010s.png" alt="Scree Plot Otoño 2010s" />
+  <img src="Results/2010s/otono/PCAplot_otono_2010s.png" alt="PCA Plot Otoño 2010s" />
+  <img src="Results/2010s/otono/Heatmap_otono_2010s.png" alt="Heatmap Otoño 2010s" />
+
 </section>
 
 <section id="interpretacion">
