@@ -237,7 +237,122 @@ pca_1850s_inv <- prcomp(temp_matrix_clean, scale. = TRUE) #Modifica las decadas 
 
 <section id="interactivo">
   <h2>4. Mapa 3D interactivo</h2>
-  <p>Aplicación interactiva para visualizar en un globo 3D los eigenvectores derivados de un análisis SVD de datos climáticos (temperaturas espacio-temporales).:</p>
+   <p>Aplicación interactiva para visualizar en un globo 3D los eigenvectores derivados de un análisis SVD de datos climáticos (temperaturas espacio-temporales).:</p>
+  <ul>
+  <pre><code>
+  library(shiny)
+library(threejs)
+library(ncdf4)
+library(dplyr)
+library(RColorBrewer)
+
+# === Cargar datos ===
+nc <- nc_open("C:/Mi_proyecto/climate-analist/Data/Land_and_Ocean_Alternate_EqualArea.nc")
+lon <- ncvar_get(nc, "longitude")
+lat <- ncvar_get(nc, "latitude")
+tiempo <- ncvar_get(nc, "time")
+tem <- ncvar_get(nc, "temperature")
+nc_close(nc)
+
+# === Preprocesamiento ===
+years <- floor(tiempo)
+months <- round((tiempo - years) * 12) + 1
+valid_rows <- apply(tem, 1, function(x) !all(is.na(x)))
+tem <- tem[valid_rows, ]
+lat <- lat[valid_rows]
+lon <- lon[valid_rows]
+tem[is.na(tem)] <- 0
+
+# === Crear décadas ===
+decadas <- seq(1850, 2020, by = 10)
+
+# === Calcular SVD por década ===
+resultados <- list()
+for (d in decadas) {
+  idx <- which(years >= d & years < d + 10)
+  if (length(idx) >= 12) {
+    m <- tem[, idx]
+    m <- scale(m, center = TRUE, scale = FALSE)
+    svd_result <- svd(m)
+    for (modo in 1:50) {
+      nombre <- paste0(d, "s - Modo ", modo)
+      resultados[[nombre]] <- list(
+        values = svd_result$u[, modo],
+        lat = lat,
+        lon = lon
+      )
+    }
+  }
+}
+
+# === Definir zonas climáticas ===
+zonas <- list(
+  "Todas" = function(x) rep(TRUE, length(x)),
+  "Zona Tropical" = function(lat) lat >= -23.5 & lat <= 23.5,
+  "Zona Templada Norte" = function(lat) lat > 23.5 & lat <= 66.5,
+  "Zona Templada Sur" = function(lat) lat < -23.5 & lat >= -66.5,
+  "Zona Polar Norte" = function(lat) lat > 66.5,
+  "Zona Polar Sur" = function(lat) lat < -66.5
+)
+
+# === Función para simular transparencia con mezcla a blanco ===
+color_simulado <- function(x) {
+  alpha <- pmin(abs(x), 1)  # asegurar rango [0,1]
+  ifelse(x > 0,
+         rgb(1, 1 - alpha, 1 - alpha),     # rojo a blanco
+         ifelse(x < 0,
+                rgb(1 - alpha, 1 - alpha, 1), # azul a blanco
+                rgb(1, 1, 1)))                 # blanco para cero
+}
+
+# === Aplicación Shiny ===
+ui <- fluidPage(
+  titlePanel("Modelo 3D de Eigenvectores por Década - Modo 3"),
+  sidebarLayout(
+    sidebarPanel(
+      selectInput("decada_modo", "Selecciona Década y Modo:",
+                  choices = names(resultados),
+                  selected = "1850s - Modo 3"),
+      selectInput("zona", "Filtrar por zona climática:",
+                  choices = names(zonas), selected = "Todas")
+    ),
+    mainPanel(
+      globeOutput("globo", height = "600px")
+    )
+  )
+)
+
+server <- function(input, output) {
+  output$globo <- renderGlobe({
+    sel <- resultados[[input$decada_modo]]
+    filtro <- zonas[[input$zona]]
+    idx <- filtro(sel$lat)
+    
+    valores <- sel$values[idx]
+    
+    # Normalizar entre -1 y 1 para simular intensidad
+    valores_norm <- valores / max(abs(valores), na.rm = TRUE)
+    
+    color_final <- sapply(valores_norm, color_simulado)
+    
+    globejs(
+      lat = sel$lat[idx],
+      long = sel$lon[idx],
+      value = rep(1, length(valores)),
+      color = color_final,
+      atmosphere = TRUE,
+      pointsize = 3,  # tamaño aumentado para mejor visibilidad
+      bg = "#000000",
+      texture = "https://raw.githubusercontent.com/johan/world.geo.json/master/countries/110m/globe.jpg"
+    )
+  })
+}
+
+shinyApp(ui = ui, server = server)
+  
+  </section>
+    
+  <p>Aplicación interactiva para visualizar en un globo 3D los eigenvectores derivados de un análisis SVD de datos climáticos por zona(temperaturas espacio-temporales).:</p>
   <ul>
   <pre><code>
 # Librerias necesarias
