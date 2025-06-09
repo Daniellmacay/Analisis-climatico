@@ -355,6 +355,7 @@ shinyApp(ui = ui, server = server)
   <p>Aplicación interactiva para visualizar en un globo 3D los eigenvectores derivados de un análisis SVD de datos climáticos por zona(temperaturas espacio-temporales).:</p>
   <ul>
   <pre><code>
+<pre><code>
 # Librerias necesarias
 library(shiny)
 library(threejs)
@@ -476,8 +477,36 @@ server <- function(input, output) {
 }
 
 shinyApp(ui = ui, server = server)
-  </code></pre>
-  </section>
+</code></pre>
+
+<section id="interpretacion">
+  <h2>5. Interpretación de Resultados</h2>
+  <p>Los gráficos permiten:</p>
+  <ul>
+    <li><span class="tooltip" data-tooltip="Muestra la cantidad de varianza explicada por cada componente principal.">Scree Plot</span>: evaluar la cantidad de componentes a retener.</li>
+    <li><span class="tooltip" data-tooltip="Visualiza la distribución de los pixeles en los dos primeros componentes principales.">PCA Plot</span>: observar agrupamientos espaciales.</li>
+    <li><span class="tooltip" data-tooltip="Mapa de calor que muestra cómo varía la temperatura por pixel a lo largo del tiempo.">Heatmap</span>: analizar tendencias temporales.</li>
+  </ul>
+</section>
+
+<section id="glosario">
+  <h2>6. Glosario de términos</h2>
+  <dl>
+    <dt><abbr title="Análisis estadístico para reducción dimensional que transforma variables correlacionadas en nuevas variables independientes.">PCA</abbr></dt>
+    <dd>Análisis de Componentes Principales</dd>
+
+    <dt><abbr title="Formato de archivo multidimensional para almacenar datos científicos, especialmente climatológicos.">NetCDF</abbr></dt>
+    <dd>Network Common Data Form</dd>
+
+    <dt><abbr title="Proceso de limpieza y transformación de datos para análisis.">Preprocesamiento</abbr></dt>
+    <dd>Preparación de datos para facilitar su análisis posterior.</dd>
+  </dl>
+</section>
+
+<footer>
+  <p>Proyecto realizado por [Daniela Macay] - <a href="https://github.com/tu_usuario/tu_repositorio" target="_blank">GitHub Repo</a></p>
+</footer>
+
       
 <section id="interpretacion">
   <h2>5. Interpretación de Resultados</h2>
